@@ -33,19 +33,6 @@ pub fn tcbpftest(ctx: SkBuffContext) -> i32 {
     }
 }
 
-#[inline(always)]
-unsafe fn ptr_at<T>(ctx: &SkBuffContext, offset: usize) -> Result<*const T, ()> {
-    let raw_skb  = ctx.as_ptr() as *const __sk_buff;
-    let start = (*raw_skb).data as usize;
-    let end = (*raw_skb).data_end as usize;
-   let len = mem::size_of::<T>();
-
-   if start + offset  + len  > end {
-       return Err(());
-   }
-
-   Ok((start + offset) as *const T)
- }
 const ETH_P_IP: u16 = 0x0800;
 const ETH_HDR_LEN: usize = mem::size_of::<ethhdr>();
 const IP_HDR_LEN: usize = mem::size_of::<iphdr>();
@@ -65,7 +52,6 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
     let length = u16::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, tot_len))?);
     let saddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, saddr))?);
     let daddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, daddr))?);
-    let protocol = u8::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, protocol))?);
     let rem_port = u16::from_be(ctx.load(ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, source))?);
     let loc_port = u16::from_be(ctx.load(ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, dest))?);
 
@@ -73,7 +59,7 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
         len: length as u32,
         src_addr: saddr,
         dest_addr: daddr,
-	proto: protocol as u32,
+        proto: ip_proto as u32,
         remote_port: rem_port as u32,
         local_port: loc_port as u32,
     };
@@ -83,3 +69,20 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
     }
     Ok(0)
 }
+
+// ptr_at is not used in this example
+// TODO: add en example with using the bpf_skb_pull_data helper and then ptr_at
+//
+// #[inline(always)]
+// unsafe fn ptr_at<T>(ctx: &SkBuffContext, offset: usize) -> Result<*const T, ()> {
+//     let raw_skb  = ctx.as_ptr() as *const __sk_buff;
+//     let start = (*raw_skb).data as usize;
+//     let end = (*raw_skb).data_end as usize;
+//    let len = mem::size_of::<T>();
+//
+//    if start + offset  + len  > end {
+//        return Err(());
+//    }
+//
+//    Ok((start + offset) as *const T)
+//  }
