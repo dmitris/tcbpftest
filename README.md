@@ -41,4 +41,4 @@ LOG: LEN 5760, SRC_IP 10.93.11.112, DEST_IP 10.229.106.123, PROTO 6, REMOTE_PORT
 
 # References
 * [Aya book](https://aya-rs.github.io/book/)
-* [Adding BPF target support to the Rust compiler](https://confused.ai/posts/rust-bpf-target) by @alessandrod
+* [Adding BPF target support to the Rust compiler](https://confused.ai/posts/rust-bpf-target) by [@alessandrod](https://github.com/alessandrod)
