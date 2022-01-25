@@ -59,8 +59,10 @@ async fn main() -> Result<(), anyhow::Error> {
 
             loop {
                 let events = buf.read_events(&mut buffers).await.unwrap();
-                for i in 0..events.read {
-                    let buf = &mut buffers[i];
+                // the iterator loop below is equivalent to:
+                // for i in 0..events.read {
+                //    let buf = &mut buffers[i];
+                for buf in buffers.iter_mut().take(events.read) {
                     let ptr = buf.as_ptr() as *const PacketLog;
                     let data = unsafe { ptr.read_unaligned() };
                     println!(
