@@ -1,0 +1,2 @@
+[workspace]
+members = ["tcbpftest", "tcbpftest-common", "xtask"]
