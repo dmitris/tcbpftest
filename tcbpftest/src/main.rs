@@ -1,16 +1,9 @@
 use aya::programs::{tc, SchedClassifier, TcAttachType};
-use aya::{
-    include_bytes_aligned,
-    maps::perf::AsyncPerfEventArray,
-    util::online_cpus,
-    Bpf,
-};
+use aya::{include_bytes_aligned, maps::perf::AsyncPerfEventArray, util::online_cpus, Bpf};
 use bytes::BytesMut;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode};
+use std::convert::{TryFrom, TryInto};
 use std::net::Ipv4Addr;
-use std::{
-    convert::{TryFrom, TryInto},
-};
 use structopt::StructOpt;
 use tokio::{signal, task};
 
@@ -71,10 +64,12 @@ async fn main() -> Result<(), anyhow::Error> {
                     let ptr = buf.as_ptr() as *const PacketLog;
                     let data = unsafe { ptr.read_unaligned() };
                     println!(
-                        "LOG: LEN {}, SRC_IP {}, DEST_IP {}",
+                        "LOG: LEN {}, SRC_IP {}, DEST_IP {}, REMOTE_PORT {}, LOCAL_PORT {}",
                         data.len,
                         Ipv4Addr::from(data.src_addr),
                         Ipv4Addr::from(data.dest_addr),
+                        data.remote_port,
+                        data.local_port,
                     );
                 }
             }

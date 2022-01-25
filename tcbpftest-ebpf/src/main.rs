@@ -63,11 +63,15 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
     let length = u16::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, tot_len))?);
     let saddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, saddr))?);
     let daddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, daddr))?);
-
+    let raw_skb  = ctx.as_ptr() as *const __sk_buff;
+    let remote_port : u16 = u16::from_be((*raw_skb).remote_port);
+    let local_port : u16 = u16::from_be((*raw_skb).local_port);
     let log_entry = PacketLog {
         len: length as u32,
         src_addr: saddr,
         dest_addr: daddr,
+        remote_port: remote_port,
+        local_port: local_port,
     };
 
     unsafe {
