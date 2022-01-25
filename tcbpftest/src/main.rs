@@ -59,19 +59,19 @@ async fn main() -> Result<(), anyhow::Error> {
 
             loop {
                 let events = buf.read_events(&mut buffers).await.unwrap();
-                // the iterator loop below is equivalent to:
+                // the iterator loop below is suggested by clippy and is  equivalent to:
                 // for i in 0..events.read {
                 //    let buf = &mut buffers[i];
                 for buf in buffers.iter_mut().take(events.read) {
                     let ptr = buf.as_ptr() as *const PacketLog;
                     let data = unsafe { ptr.read_unaligned() };
                     println!(
-                        "LOG: LEN {}, SRC_IP {}, DEST_IP {}, REMOTE_PORT {}, LOCAL_PORT {} {:#04x}",
+                        "LOG: LEN {}, SRC_IP {}, DEST_IP {}, PROTO {}, REMOTE_PORT {}, LOCAL_PORT {}",
                         data.len,
                         Ipv4Addr::from(data.src_addr),
                         Ipv4Addr::from(data.dest_addr),
+			data.proto,
                         data.remote_port,
-                        data.local_port,
                         data.local_port,
                     );
                 }

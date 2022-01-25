@@ -48,6 +48,7 @@ unsafe fn ptr_at<T>(ctx: &SkBuffContext, offset: usize) -> Result<*const T, ()> 
  }
 const ETH_P_IP: u16 = 0x0800;
 const ETH_HDR_LEN: usize = mem::size_of::<ethhdr>();
+const IP_HDR_LEN: usize = mem::size_of::<iphdr>();
 const IPPROTO_TCP : u8  = 6;
 const IPPROTO_UDP : u8 = 17;
 const SPORT_OFFSET : u8 = 0;
@@ -57,30 +58,24 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
     // get the ethernet header proto field as well as the IP protocol one
     let eth_proto = u16::from_be(ctx.load(offset_of!(ethhdr, h_proto))?);
     let ip_proto = ctx.load::<u8>(ETH_HDR_LEN + offset_of!(iphdr, protocol))?;
-    if !(eth_proto == ETH_P_IP && ip_proto == IPPROTO_TCP) {
-    // if !(eth_proto == ETH_P_IP && (ip_proto == IPPROTO_TCP || ip_proto == IPPROTO_UDP)) {
+    if !(eth_proto == ETH_P_IP && (ip_proto == IPPROTO_TCP || ip_proto == IPPROTO_UDP)) {
         return Ok(0);
     }
 
     let length = u16::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, tot_len))?);
     let saddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, saddr))?);
     let daddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, daddr))?);
-    let remote_port_val = match ptr_at::<u16>(&ctx, offset_of!(tcphdr, source)) {
-	Err(_) => return Err(126),
-	Ok(v) => v,
-    };
-    let loc_port_val = match ptr_at::<u16>(&ctx, offset_of!(tcphdr, dest)) {
-	Err(_) => return Err(127),
-	Ok(v) => v,
-    };
+    let protocol = u8::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, protocol))?);
+    let rem_port = u16::from_be(ctx.load(ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, source))?);
+    let loc_port = u16::from_be(ctx.load(ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, dest))?);
+
     let log_entry = PacketLog {
         len: length as u32,
         src_addr: saddr,
         dest_addr: daddr,
-        remote_port: *remote_port_val as u32,
-        local_port: *loc_port_val as u32, 
-        // remote_port: u16::from_be(*remote_port_val) as u32,
-        // local_port: u16::from_be(*loc_port_val) as u32, 
+	proto: protocol as u32,
+        remote_port: rem_port as u32,
+        local_port: loc_port as u32,
     };
 
     unsafe {
