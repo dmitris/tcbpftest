@@ -1,19 +1,15 @@
-use anyhow::Context;
 use aya::programs::{tc, SchedClassifier, TcAttachType};
 use aya::{
     include_bytes_aligned,
-    maps::perf::{AsyncPerfEventArray, PerfBufferError},
+    maps::perf::AsyncPerfEventArray,
     util::online_cpus,
     Bpf,
 };
 use bytes::BytesMut;
-use log::info;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode};
 use std::net::Ipv4Addr;
 use std::{
     convert::{TryFrom, TryInto},
-    sync::atomic::{AtomicBool, Ordering},
-    sync::Arc,
 };
 use structopt::StructOpt;
 use tokio::{signal, task};
@@ -39,15 +35,6 @@ async fn main() -> Result<(), anyhow::Error> {
         TerminalMode::Mixed,
         ColorChoice::Auto,
     )?;
-
-    #[cfg(debug_assertions)]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/debug/tcbpftest"
-    ))?;
-    #[cfg(not(debug_assertions))]
-    let mut bpf = Bpf::load(include_bytes_aligned!(
-        "../../target/bpfel-unknown-none/release/tcbpftest}"
-    ))?;
 
     // This will include your eBPF object file as raw bytes at compile-time and load it at
     // runtime. This approach is recommended for most real-world use cases. If you would
