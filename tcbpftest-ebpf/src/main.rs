@@ -51,18 +51,25 @@ unsafe fn ptr_at<T>(ctx: &SkBuffContext, offset: usize) -> Result<*const T, ()> 
 unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
     let skb  = ctx.as_ptr() as *const __sk_buff;
 
-    let src_offset : usize = 12; // Source IP Address offset 12 - https://en.wikipedia.org/wiki/IPv4#Header
+    // https://en.wikipedia.org/wiki/IPv4#Header
+    let version_offset : usize = 0; // Version is the first byte, both in IPv4 and IPv6 headers
+    let src_offset : usize = 12; // Source IP Address offset 12
     let dest_offset : usize = 16; // Dest IP Addresss offset 16
-    let src_val = match ptr_at::<u32>(&ctx, src_offset) {
+    let version_val = match ptr_at::<u32>(&ctx, version_offset) {
         Err(_) => return Err(123),
         Ok(v) => v,
     };
+    let src_val = match ptr_at::<u32>(&ctx, src_offset) {
+        Err(_) => return Err(124),
+        Ok(v) => v,
+    };
     let dest_val = match ptr_at::<u32>(&ctx, dest_offset) {
-        Err(_) => return Err(123),
+        Err(_) => return Err(125),
         Ok(v) => v,
     };
     let log_entry = PacketLog {
         len: u32::from_be((*skb).len),
+        version: u32::from_be(*version_val),
         src_addr: u32::from_be(*src_val),
         dest_addr: u32::from_be(*dest_val),
     };
