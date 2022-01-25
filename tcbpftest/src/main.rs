@@ -86,10 +86,8 @@ async fn main() -> Result<(), anyhow::Error> {
                     println!(
                         "LOG: LEN {}, SRC_IP {} ({:#04x}), DEST_IP {} ({:#04x})",
                         data.len,
-                        Ipv4Addr::from(data.src_addr),
-                        data.src_addr,
-                        Ipv4Addr::from(data.dest_addr),
-                        data.dest_addr,
+                        Ipv4Addr::from(data.src_addr), data.src_addr,
+                        Ipv4Addr::from(data.dest_addr), data.dest_addr,
                     );
                 }
             }
