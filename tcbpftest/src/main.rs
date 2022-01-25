@@ -64,11 +64,12 @@ async fn main() -> Result<(), anyhow::Error> {
                     let ptr = buf.as_ptr() as *const PacketLog;
                     let data = unsafe { ptr.read_unaligned() };
                     println!(
-                        "LOG: LEN {}, SRC_IP {}, DEST_IP {}, REMOTE_PORT {}, LOCAL_PORT {}",
+                        "LOG: LEN {}, SRC_IP {}, DEST_IP {}, REMOTE_PORT {}, LOCAL_PORT {} {:#04x}",
                         data.len,
                         Ipv4Addr::from(data.src_addr),
                         Ipv4Addr::from(data.dest_addr),
                         data.remote_port,
+                        data.local_port,
                         data.local_port,
                     );
                 }
