@@ -38,3 +38,7 @@ LOG: LEN 40, SRC_IP 10.0.2.2, DEST_IP 10.0.2.15, PROTO 6, REMOTE_PORT 51342, LOC
 LOG: LEN 250, SRC_IP 10.93.11.112, DEST_IP 10.229.106.123, PROTO 6, REMOTE_PORT 40292, LOCAL_PORT 4080
 LOG: LEN 5760, SRC_IP 10.93.11.112, DEST_IP 10.229.106.123, PROTO 6, REMOTE_PORT 40292, LOCAL_PORT 4080
 ```
+
+# References
+* [Aya book](https://aya-rs.github.io/book/)
+* [Adding BPF target support to the Rust compiler](https://confused.ai/posts/rust-bpf-target) by @alessandrod
