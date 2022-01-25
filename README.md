@@ -25,8 +25,10 @@ cd tcbpftest
 cargo xtask build-ebpf
 # build the user-space program
 cargo build
-# loadsinto the kernel and attaches to the tc hook the eBPF object file
-# and runs the user-space program reading data from the maps and printing to stdout
+## NB: for a release build: cargo xtask build-ebpf --release && cargo build --release
+#
+# load into the kernel and attach the eBPF object file to the tc hook,
+# then run the user-space program reading data from the maps and printing to stdout
 sudo target/debug/tcbpftest
 18:28:31 [DEBUG] (1) aya::bpf: [/home/dsavints/.cargo/git/checkouts/aya-c55fbc69175ac116/2a18239/aya/src/bpf.rs:102] [FEAT PROBE] BPF program name support: true
 [...]
