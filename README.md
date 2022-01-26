@@ -39,6 +39,16 @@ LOG: LEN 250, SRC_IP 10.93.11.112, DEST_IP 10.229.106.123, PROTO 6, REMOTE_PORT 
 LOG: LEN 5760, SRC_IP 10.93.11.112, DEST_IP 10.229.106.123, PROTO 6, REMOTE_PORT 40292, LOCAL_PORT 4080
 ```
 
+# Cross-compilation
+The example program can be cross-compiled on Mac for Linux:
+```
+brew install FiloSottile/musl-cross/musl-cross
+LLVM_SYS_120_PREFIX=/usr/local/opt/llvm cargo install bpf-linker --no-default-features --features system-llvm --force
+cargo xtask build-ebpf --release
+RUSTFLAGS="-Clinker=x86_64-linux-musl-ld" cargo build --release --target=x86_64-unknown-linux-musl
+```
+The cross-compiled program `target/x86_64-unknown-linux-musl/release/tcbpftest` can be copied to a Linux server (with a capable kernel) and run there.
+
 # References
 * [Aya book](https://aya-rs.github.io/book/)
 * [Adding BPF target support to the Rust compiler](https://confused.ai/posts/rust-bpf-target) by [@alessandrod](https://github.com/alessandrod)
