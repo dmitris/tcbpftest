@@ -11,7 +11,7 @@ On a RHEL or Fedora-like server or VM, you should be able to do:
 # Install Rust - https://rust-lang.org
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # Hit “Enter” to accept the default “> Proceed with installation” option.
-source "$HOME/.cargo/env
+source "$HOME/.cargo/env"
 rustup toolchain install nightly --component rust-src
 cargo install bpf-linker
 sudo dnf -y install gcc git
@@ -37,6 +37,25 @@ LOG: LEN 40, SRC_IP 10.0.2.2, DEST_IP 10.0.2.15, PROTO 6, REMOTE_PORT 51342, LOC
 LOG: LEN 40, SRC_IP 10.0.2.2, DEST_IP 10.0.2.15, PROTO 6, REMOTE_PORT 51342, LOCAL_PORT 22
 LOG: LEN 250, SRC_IP 10.93.11.112, DEST_IP 10.229.106.123, PROTO 6, REMOTE_PORT 40292, LOCAL_PORT 4080
 LOG: LEN 5760, SRC_IP 10.93.11.112, DEST_IP 10.229.106.123, PROTO 6, REMOTE_PORT 40292, LOCAL_PORT 4080
+```
+
+# Cross-compilation
+The example program can be cross-compiled on an Intel Mac for Linux:
+```
+rustup target add x86_64-unknown-linux-musl
+brew install FiloSottile/musl-cross/musl-cross
+brew install llvm
+LLVM_SYS_120_PREFIX=/usr/local/opt/llvm cargo install bpf-linker --no-default-features --features system-llvm --force
+cargo xtask build-ebpf --release
+# '-C link-arg=-s' and '--release' flags are optional (to produce a smaller executable file)
+RUSTFLAGS="-Clinker=x86_64-linux-musl-ld -C link-arg=-s" cargo build --release --target=x86_64-unknown-linux-musl
+
+```
+The cross-compiled program `target/x86_64-unknown-linux-musl/release/tcbpftest` can be copied to a Linux server (having a capable kernel) and run there:
+```
+$ ls -lh target/x86_64-unknown-linux-musl/{debug,release}/tcbpftest
+-rwxr-xr-x  2 dmitris  staff    36M Jan 26 12:20 target/x86_64-unknown-linux-musl/debug/tcbpftest
+-rwxr-xr-x  2 dmitris  staff   1.7M Jan 26 13:37 target/x86_64-unknown-linux-musl/release/tcbpftest
 ```
 
 # References
