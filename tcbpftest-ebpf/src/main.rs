@@ -8,7 +8,6 @@ use aya_bpf::{
     programs::SkBuffContext,
 };
 use aya_bpf::bindings:: __sk_buff;
-use core::convert::TryInto;
 use core::mem;
 use memoffset::offset_of;
 
