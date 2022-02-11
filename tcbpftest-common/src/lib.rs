@@ -9,7 +9,7 @@ pub struct PacketLog {
     pub proto: u32,       // ipv4 protocol
     pub remote_port: u32, // TCP or UDP remote port (sport for ingress)
     pub remote_port2: u32,
-    pub local_port: u32,  // TCP or UDP local port (dport for ingress)
+    pub local_port: u32, // TCP or UDP local port (dport for ingress)
     pub local_port2: u32,
 }
 
