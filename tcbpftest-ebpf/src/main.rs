@@ -8,6 +8,7 @@ use aya_bpf::{
     programs::SkBuffContext,
 };
 use aya_bpf::bindings:: __sk_buff;
+use aya_bpf::helpers::bpf_skb_pull_data;
 use core::mem;
 use memoffset::offset_of;
 
@@ -51,16 +52,39 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
     let length = u16::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, tot_len))?);
     let saddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, saddr))?);
     let daddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, daddr))?);
-    let rem_port = u16::from_be(ctx.load(ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, source))?);
-    let loc_port = u16::from_be(ctx.load(ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, dest))?);
+    let rem_port2 = u16::from_be(ctx.load(ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, source))?);
+    let loc_port2 = u16::from_be(ctx.load(ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, dest))?);
+
+    let skb = ctx.as_ptr() as *mut __sk_buff;
+    let ctx_len = ctx.len();
+    if  bpf_skb_pull_data(skb, ctx_len) != 0 {
+        return Err(199);
+    }
+    let rem_port_val : u32;
+    let loc_port_val : u32;
+    unsafe {
+      loc_port_val =  match  ptr_at(&ctx, offset_of!(__sk_buff, local_port)) {
+                Err(_) => return Err(198),
+                Ok(val) => *val,
+            };
+      rem_port_val = match ptr_at(&ctx, offset_of!(__sk_buff, remote_port)) {
+            Err(_) => return Err(197),
+            Ok(val) => *val,
+      };
+    }
+    let rem_port = u32::from_be(rem_port_val);
+    let loc_port = u32::from_be(loc_port_val);
 
     let log_entry = PacketLog {
         len: length as u32,
+        ctx_len: ctx_len,
         src_addr: saddr,
         dest_addr: daddr,
         proto: ip_proto as u32,
-        remote_port: rem_port as u32,
-        local_port: loc_port as u32,
+        remote_port: rem_port, //  as u32,
+        remote_port2: rem_port2 as u32,
+        local_port: loc_port, //  as u32,
+        local_port2: loc_port2 as u32,
     };
 
     unsafe {
@@ -69,19 +93,18 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
     Ok(0)
 }
 
-// ptr_at is not used in this example
 // TODO: add en example with using the bpf_skb_pull_data helper and then ptr_at
 //
-// #[inline(always)]
-// unsafe fn ptr_at<T>(ctx: &SkBuffContext, offset: usize) -> Result<*const T, ()> {
-//     let raw_skb  = ctx.as_ptr() as *const __sk_buff;
-//     let start = (*raw_skb).data as usize;
-//     let end = (*raw_skb).data_end as usize;
-//    let len = mem::size_of::<T>();
-//
-//    if start + offset  + len  > end {
-//        return Err(());
-//    }
-//
-//    Ok((start + offset) as *const T)
-//  }
+#[inline(always)]
+unsafe fn ptr_at<T>(ctx: &SkBuffContext, offset: usize) -> Result<*const T, ()> {
+    let raw_skb  = ctx.as_ptr() as *const __sk_buff;
+    let start = (*raw_skb).data as usize;
+    let end = (*raw_skb).data_end as usize;
+    let len = mem::size_of::<T>();
+
+    if start + offset  + len  > end {
+        return Err(());
+    }
+
+    Ok((start + offset) as *const T)
+}
