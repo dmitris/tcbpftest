@@ -2,7 +2,6 @@ use aya::programs::{tc, SchedClassifier, TcAttachType};
 use aya::{include_bytes_aligned, maps::perf::AsyncPerfEventArray, util::online_cpus, Bpf};
 use bytes::BytesMut;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode};
-use std::convert::{TryFrom, TryInto};
 use std::net::Ipv4Addr;
 use structopt::StructOpt;
 use tokio::{signal, task};
