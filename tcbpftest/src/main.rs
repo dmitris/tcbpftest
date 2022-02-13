@@ -45,6 +45,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let _ = tc::qdisc_add_clsact(&opt.iface);
     let program: &mut SchedClassifier = bpf.program_mut("tcbpftest").unwrap().try_into()?;
     program.load()?;
+    // program.attach(&opt.iface, TcAttachType::Egress)?;
     program.attach(&opt.iface, TcAttachType::Ingress)?;
 
     let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut("EVENTS")?)?;
@@ -65,12 +66,14 @@ async fn main() -> Result<(), anyhow::Error> {
                     let ptr = buf.as_ptr() as *const PacketLog;
                     let data = unsafe { ptr.read_unaligned() };
                     println!(
-                        "LOG: LEN {}, CTX_LEN {}, SRC_IP {}, DEST_IP {}, PROTO {}, REMOTE_PORT {}, REMOTE_PORT2 {}, LOCAL_PORT {}, LOCAL_PORT2 {}",
+                        "LOG: LEN {}, CTX_LEN {}, SRC_IP {}, DEST_IP {}, ETH_PROTO 0x{:X}, ETH_PROTO2 0x{:X}, IP_PROTO {}, REMOTE_PORT {}, REMOTE_PORT2 {}, LOCAL_PORT {}, LOCAL_PORT2 {}",
                         data.len,
                         data.ctx_len,
                         Ipv4Addr::from(data.src_addr),
                         Ipv4Addr::from(data.dest_addr),
-			data.proto,
+			data.eth_proto,
+			data.eth_proto2,
+			data.ip_proto,
                         data.remote_port,
                         data.remote_port2,
                         data.local_port,
