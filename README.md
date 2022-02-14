@@ -21,22 +21,27 @@ sudo dnf -y install gcc git
 ```
 git clone https://github.com/dmitris/tcbpftest
 cd tcbpftest
+```
 # build eBPF object file
+```
 cargo xtask build-ebpf
+```
 # build the user-space program
-cargo build
-## NB: for a release build: cargo xtask build-ebpf --release && cargo build --release
-#
-# load into the kernel and attach the eBPF object file to the tc hook,
-# then run the user-space program reading data from the maps and printing to stdout
-sudo target/debug/tcbpftest
-18:28:31 [DEBUG] (1) aya::bpf: [/home/dsavints/.cargo/git/checkouts/aya-c55fbc69175ac116/2a18239/aya/src/bpf.rs:102] [FEAT PROBE] BPF program name support: true
-[...]
-18:28:31 [DEBUG] (1) aya::obj::relocation: [/home/dsavints/.cargo/git/checkouts/aya-c55fbc69175ac116/2a18239/aya/src/obj/relocation.rs:349] finished relocating program tcbpftest function tcbpftest
-LOG: LEN 40, SRC_IP 10.0.2.2, DEST_IP 10.0.2.15, PROTO 6, REMOTE_PORT 51342, LOCAL_PORT 22
-LOG: LEN 40, SRC_IP 10.0.2.2, DEST_IP 10.0.2.15, PROTO 6, REMOTE_PORT 51342, LOCAL_PORT 22
-LOG: LEN 250, SRC_IP 10.93.11.112, DEST_IP 10.229.106.123, PROTO 6, REMOTE_PORT 40292, LOCAL_PORT 4080
-LOG: LEN 5760, SRC_IP 10.93.11.112, DEST_IP 10.229.106.123, PROTO 6, REMOTE_PORT 40292, LOCAL_PORT 4080
+```
+cargo build --release
+```
+
+NB: for a debug build: `cargo xtask build-ebpf --debug && cargo build`.
+
+Load into the kernel and attach the eBPF object file to the `tc` hook,
+then run the user-space program reading data from the maps and printing to stdout:
+```
+sudo target/release/tcbpftest
+
+LOG: LEN 238, CTX_LEN 252, SRC_IP 192.168.178.1, DEST_IP 192.168.178.255, ETH_PROTO 0x800, ETH_PROTO2 0x8000000, IP_PROTO 17, REMOTE_PORT 138, REMOTE_PORT2 138, LOCAL_PORT 138, LOCAL_PORT2 138
+LOG: LEN 77, CTX_LEN 91, SRC_IP 140.82.113.26, DEST_IP 192.168.178.36, ETH_PROTO 0x800, ETH_PROTO2 0x8000000, IP_PROTO 6, REMOTE_PORT 443, REMOTE_PORT2 443, LOCAL_PORT 35628, LOCAL_PORT2 35628
+LOG: LEN 52, CTX_LEN 66, SRC_IP 140.82.113.26, DEST_IP 192.168.178.36, ETH_PROTO 0x800, ETH_PROTO2 0x8000000, IP_PROTO 6, REMOTE_PORT 443, REMOTE_PORT2 443, LOCAL_PORT 35628, LOCAL_PORT2 35628
+
 ```
 
 # Cross-compilation
