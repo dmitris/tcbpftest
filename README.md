@@ -59,8 +59,7 @@ RUSTFLAGS="-Clinker=x86_64-linux-musl-ld -C link-arg=-s" cargo build --release -
 The cross-compiled program `target/x86_64-unknown-linux-musl/release/tcbpftest` can be copied to a Linux server (having a capable kernel) and run there:
 ```
 $ ls -lh target/x86_64-unknown-linux-musl/release/tcbpftest
--rwxr-xr-x  2 dmitris  staff    36M Jan 26 12:20 target/x86_64-unknown-linux-musl/debug/tcbpftest
--rwxr-xr-x  2 dmitris  staff   1.7M Jan 26 13:37 target/x86_64-unknown-linux-musl/release/tcbpftest
+-rwxr-xr-x  1 dmitris  staff   1.6M Mar 15 19:03 target/x86_64-unknown-linux-musl/release/tcbpftest
 ```
 
 # References
