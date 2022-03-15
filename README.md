@@ -51,7 +51,7 @@ rustup target add x86_64-unknown-linux-musl
 brew install FiloSottile/musl-cross/musl-cross
 brew install llvm
 LLVM_SYS_120_PREFIX=/usr/local/opt/llvm cargo install bpf-linker --no-default-features --features system-llvm --force
-cargo xtask build-ebpf --release
+cargo xtask build-ebpf
 # '-C link-arg=-s' and '--release' flags are optional (to produce a smaller executable file)
 RUSTFLAGS="-Clinker=x86_64-linux-musl-ld -C link-arg=-s" cargo build --release --target=x86_64-unknown-linux-musl
 
