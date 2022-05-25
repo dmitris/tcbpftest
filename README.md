@@ -50,7 +50,8 @@ The example program can be cross-compiled on an Intel Mac for Linux:
 rustup target add x86_64-unknown-linux-musl
 brew install FiloSottile/musl-cross/musl-cross
 brew install llvm
-LLVM_SYS_120_PREFIX=/usr/local/opt/llvm cargo install bpf-linker --no-default-features --features system-llvm --force
+# adjust the path for LLVM installation as needed - if installed with brew on Mac, it is normally /usr/local/opt/llvm - see $(brew --prefix llvm).
+LLVM_SYS_140_PREFIX=/opt/local cargo install bpf-linker --no-default-features --features system-llvm --force
 cargo xtask build-ebpf
 # '-C link-arg=-s' and '--release' flags are optional (to produce a smaller executable file)
 RUSTFLAGS="-Clinker=x86_64-linux-musl-ld -C link-arg=-s" cargo build --release --target=x86_64-unknown-linux-musl
