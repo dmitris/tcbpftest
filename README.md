@@ -5,7 +5,8 @@
 1. Install `rustup` following the instructions on https://rustup.rs/.
 2. Install a rust stable toolchain: `rustup install stable`
 3. Install a rust nightly toolchain: `rustup toolchain install nightly --component rust-src`
-4. Install bpf-linker: `cargo install bpf-linker`
+4. Ensure C compiler and linker are installed.
+5. Install bpf-linker: `cargo install bpf-linker`
 
 On a RHEL or Fedora-like server or VM, you should be able to do:
 ```
@@ -14,8 +15,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # Hit “Enter” to accept the default “> Proceed with installation” option.
 source "$HOME/.cargo/env"
 rustup toolchain install nightly --component rust-src
-cargo install bpf-linker
 sudo dnf -y install gcc git
+cargo install bpf-linker
 ```
 
 # Build and Run
