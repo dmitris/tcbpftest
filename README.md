@@ -2,9 +2,10 @@
 
 ## Prerequisites
 
-1. Install a rust stable toolchain: `rustup install stable`
-1. Install a rust nightly toolchain: `rustup toolchain install nightly --component rust-src`
-1. Install bpf-linker: `cargo install bpf-linker`
+1. Install `rustup` following the instructions on https://rustup.rs/.
+2. Install a rust stable toolchain: `rustup install stable`
+3. Install a rust nightly toolchain: `rustup toolchain install nightly --component rust-src`
+4. Install bpf-linker: `cargo install bpf-linker`
 
 On a RHEL or Fedora-like server or VM, you should be able to do:
 ```
