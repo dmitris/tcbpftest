@@ -13,6 +13,7 @@ pub struct PacketLog {
     pub remote_port2: u32,
     pub local_port: u32, // TCP or UDP local port (dport for ingress)
     pub local_port2: u32,
+    pub udp_len: u32,
 }
 
 #[cfg(feature = "user")]
