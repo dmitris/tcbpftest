@@ -64,14 +64,25 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
     let rem_port_val : u16;
     let loc_port_val : u16;
     unsafe {
-      rem_port_val = match ptr_at(&ctx, ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, source)) {
-            Err(_) => return Err(197),
-            Ok(val) => *val,
-      };
-      loc_port_val =  match  ptr_at(&ctx, ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, dest)) {
-                Err(_) => return Err(198),
+      if ip_proto == IPPROTO_TCP {
+        rem_port_val = match ptr_at(&ctx, ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, source)) {
+                Err(_) => return Err(197),
                 Ok(val) => *val,
-            };
+        };
+        loc_port_val =  match  ptr_at(&ctx, ETH_HDR_LEN + IP_HDR_LEN + offset_of!(tcphdr, dest)) {
+                    Err(_) => return Err(198),
+                    Ok(val) => *val,
+                };
+        } else { // ip_proto == IPPROTO_UDP
+            rem_port_val = match ptr_at(&ctx, ETH_HDR_LEN + IP_HDR_LEN + offset_of!(udphdr, source)) {
+                Err(_) => return Err(197),
+                Ok(val) => *val,
+        };
+        loc_port_val =  match  ptr_at(&ctx, ETH_HDR_LEN + IP_HDR_LEN + offset_of!(udphdr, dest)) {
+                    Err(_) => return Err(198),
+                    Ok(val) => *val,
+                };
+        }
     }
     let rem_port = u16::from_be(rem_port_val);
     let loc_port = u16::from_be(loc_port_val);
