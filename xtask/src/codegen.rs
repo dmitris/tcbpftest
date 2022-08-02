@@ -7,10 +7,10 @@ use std::{
 
 pub fn generate() -> Result<(), anyhow::Error> {
     let dir = PathBuf::from("tcbpftest-ebpf/src");
-    let names: Vec<&str> = vec!["ethhdr", "iphdr"];
+    let names: Vec<&str> = vec!["ethhdr", "iphdr", "tcphdr", "udphdr"];
     let bindings = aya_gen::generate(InputFile::Btf(PathBuf::from("/sys/kernel/btf/vmlinux")), &names, &[])?;
     // Write the bindings to the $OUT_DIR/bindings.rs file.
     let mut out = File::create(dir.join("bindings.rs"))?;
-    write!(out, "{}", bindings)?;
+    write!(out, "{:?}", bindings)?;
     Ok(())
 }
