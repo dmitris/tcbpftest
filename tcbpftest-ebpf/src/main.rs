@@ -105,6 +105,7 @@ unsafe fn try_tcbpftest(ctx: TcContext) -> Result<i32, i64> {
     unsafe {
         EVENTS.output(&ctx, &log_entry, 0);
     }
+    info!(&ctx, "packet:");
     Ok(0)
 }
 

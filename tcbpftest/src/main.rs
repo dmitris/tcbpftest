@@ -66,6 +66,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 for buf in buffers.iter_mut().take(events.read) {
                     let ptr = buf.as_ptr() as *const PacketLog;
                     let data = unsafe { ptr.read_unaligned() };
+                    /*
                     println!(
                         "LOG: LEN {}, CTX_LEN {}, UDP_LEN {}, SRC_IP {}, DEST_IP {}, ETH_PROTO 0x{:X}, ETH_PROTO2 0x{:X}, IP_PROTO {}, REMOTE_PORT {}, REMOTE_PORT2 {}, LOCAL_PORT {}, LOCAL_PORT2 {}",
                         data.len,
@@ -81,6 +82,7 @@ async fn main() -> Result<(), anyhow::Error> {
                         data.local_port,
                         data.local_port2,
                     );
+                    */
                 }
             }
         });
