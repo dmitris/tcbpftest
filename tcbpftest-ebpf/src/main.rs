@@ -15,7 +15,7 @@ use memoffset::offset_of;
 use tcbpftest_common::PacketLog;
 
 mod bindings;
-use bindings::{ethhdr, iphdr, tcphdr};
+use bindings::{ethhdr, iphdr, tcphdr, udphdr};
 
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
@@ -76,18 +76,28 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
     let rem_port = u16::from_be(rem_port_val);
     let loc_port = u16::from_be(loc_port_val);
 
+    let mut udp_len_val : u16 = 0;
+    if ip_proto == IPPROTO_UDP {
+      unsafe {
+        udp_len_val = match ptr_at(&ctx, ETH_HDR_LEN + IP_HDR_LEN + offset_of!(udphdr, len)) {
+            Err(_) => return Err(197),
+            Ok(val) => *val,
+        };
+      }
+    }
     let log_entry = PacketLog {
         len: length as u32,
         ctx_len: ctx_len,
         src_addr: saddr,
         dest_addr: daddr,
-	eth_proto: eth_proto as u32,
-	eth_proto2: eth_proto2 as u32,
+	    eth_proto: eth_proto as u32,
+	    eth_proto2: eth_proto2 as u32,
         ip_proto: ip_proto as u32,
         remote_port: rem_port as u32,
         remote_port2: rem_port2 as u32,
         local_port: loc_port as u32,
         local_port2: loc_port2 as u32,
+        udp_len: u16::from_be(udp_len_val) as u32,
     };
 
     unsafe {
