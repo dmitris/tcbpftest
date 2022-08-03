@@ -9,6 +9,7 @@ use aya_bpf::{
 };
 use aya_bpf::bindings:: __sk_buff;
 use aya_bpf::helpers::bpf_skb_pull_data;
+use aya_log_ebpf::info;
 use core::mem;
 use memoffset::offset_of;
 
