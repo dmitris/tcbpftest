@@ -25,15 +25,16 @@ git clone https://github.com/dmitris/tcbpftest
 cd tcbpftest
 ```
 # build eBPF object file
+See the note below ("NB") for the release build options.
 ```
 cargo xtask build-ebpf
 ```
 # build the user-space program
 ```
-cargo build --release
+cargo build
 ```
 
-NB: for a debug build: `cargo xtask build-ebpf --debug && cargo build`.
+NB: for a release build: `cargo xtask build-ebpf --release && cargo build --release`.
 
 Load into the kernel and attach the eBPF object file to the `tc` hook,
 then run the user-space program reading data from the maps and printing to stdout:
