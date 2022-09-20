@@ -46,7 +46,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let program: &mut SchedClassifier = bpf.program_mut("tcbpftest").unwrap().try_into()?;
     program.load()?;
     // program.attach(&opt.iface, TcAttachType::Egress)?;
-    program.attach(&opt.iface, TcAttachType::Ingress)?;
+    program.attach(&opt.iface, TcAttachType::Ingress, 0)?;
 
     let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut("EVENTS")?)?;
     for cpu_id in online_cpus()? {
