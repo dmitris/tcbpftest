@@ -14,6 +14,10 @@ use memoffset::offset_of;
 
 use tcbpftest_common::PacketLog;
 
+#[allow(non_upper_case_globals)]
+#[allow(non_snake_case)]
+#[allow(non_camel_case_types)]
+#[allow(dead_code)]
 mod bindings;
 use bindings::{ethhdr, iphdr, tcphdr, udphdr};
 
@@ -38,8 +42,6 @@ const ETH_HDR_LEN: usize = mem::size_of::<ethhdr>();
 const IP_HDR_LEN: usize = mem::size_of::<iphdr>();
 const IPPROTO_TCP : u8  = 6;
 const IPPROTO_UDP : u8 = 17;
-const SPORT_OFFSET : u8 = 0;
-const DPORT_OFFSET : u8 = 0;
 
 unsafe fn try_tcbpftest(ctx: TcContext) -> Result<i32, i64> {
     let ctx_len = ctx.len();
