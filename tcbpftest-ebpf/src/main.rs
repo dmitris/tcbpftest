@@ -3,9 +3,9 @@
 
 use aya_bpf::{
     BpfContext,
-    macros::{map, classifier},
+    macros::{classifier, map},
     maps::PerfEventArray,
-    programs::SkBuffContext,
+    programs::TcContext,
 };
 use aya_bpf::bindings:: __sk_buff;
 use aya_bpf::helpers::bpf_skb_pull_data;
@@ -26,7 +26,7 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 static mut EVENTS: PerfEventArray<PacketLog> = PerfEventArray::<PacketLog>::with_max_entries(1024, 0);
 
 #[classifier(name="tcbpftest")]
-pub fn tcbpftest(ctx: SkBuffContext) -> i32 {
+pub fn tcbpftest(ctx: TcContext) -> i32 {
     match unsafe { try_tcbpftest(ctx) } {
         Ok(ret) => ret,
         Err(_) => 123,
@@ -41,7 +41,7 @@ const IPPROTO_UDP : u8 = 17;
 const SPORT_OFFSET : u8 = 0;
 const DPORT_OFFSET : u8 = 0;
 
-unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
+unsafe fn try_tcbpftest(ctx: TcContext) -> Result<i32, i64> {
     let ctx_len = ctx.len();
     let skb = ctx.as_ptr() as *mut __sk_buff;
     if  bpf_skb_pull_data(skb, ctx_len) != 0 {
@@ -109,7 +109,7 @@ unsafe fn try_tcbpftest(ctx: SkBuffContext) -> Result<i32, i64> {
 // TODO: add en example with using the bpf_skb_pull_data helper and then ptr_at
 //
 #[inline(always)]
-unsafe fn ptr_at<T>(ctx: &SkBuffContext, offset: usize) -> Result<*const T, ()> {
+unsafe fn ptr_at<T>(ctx: &TcContext, offset: usize) -> Result<*const T, ()> {
     let raw_skb  = ctx.as_ptr() as *const __sk_buff;
     let start = (*raw_skb).data as usize;
     let end = (*raw_skb).data_end as usize;
