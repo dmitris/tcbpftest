@@ -40,10 +40,10 @@ pub struct Options {
     pub release: bool,
 }
 
-pub fn build(opts: Options) -> Result<(), anyhow::Error> {
+pub fn build_ebpf(opts: Options) -> Result<(), anyhow::Error> {
     let dir = PathBuf::from("tcbpftest-ebpf");
     let target = format!("--target={}", opts.target);
-    let args = vec![
+    let mut args = vec![
         "+nightly",
         "build",
         "--verbose",
