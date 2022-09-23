@@ -1,5 +1,6 @@
 mod build_ebpf;
 mod codegen;
+mod run;
 
 use std::process::exit;
 
