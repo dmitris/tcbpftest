@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use structopt::StructOpt;
+use clap::Parser;
 
 #[derive(Debug, Copy, Clone)]
 pub enum Architecture {
@@ -52,11 +52,14 @@ pub fn build(opts: Options) -> Result<(), anyhow::Error> {
         "--profile",
         opts.profile.as_str(),
     ];
+    if opts.release {
+        args.push("--release")
+    }
     let status = Command::new("cargo")
         .current_dir(&dir)
         .args(&args)
         .status()
-        .expect("failed to build bpf examples");
+        .expect("failed to build bpf program");
     assert!(status.success());
     Ok(())
 }
