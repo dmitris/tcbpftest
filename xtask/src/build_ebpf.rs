@@ -30,13 +30,14 @@ impl std::fmt::Display for Architecture {
     }
 }
 
-#[derive(StructOpt)]
+#[derive(Debug, Parser)]
 pub struct Options {
-    #[structopt(default_value = "bpfel-unknown-none", long)]
-    target: Architecture,
-    /// Build profile for eBPF programs
-    #[structopt(default_value = "release", long)]
-    pub profile: String,
+    /// Set the endianness of the BPF target
+    #[clap(default_value = "bpfel-unknown-none", long)]
+    pub target: Architecture,
+    /// Build the release target
+    #[clap(long)]
+    pub release: bool,
 }
 
 pub fn build(opts: Options) -> Result<(), anyhow::Error> {
@@ -49,8 +50,6 @@ pub fn build(opts: Options) -> Result<(), anyhow::Error> {
         target.as_str(),
         "-Z",
         "build-std=core",
-        "--profile",
-        opts.profile.as_str(),
     ];
     if opts.release {
         args.push("--release")
