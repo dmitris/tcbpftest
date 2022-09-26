@@ -24,7 +24,7 @@ fn main() {
 
     use Command::*;
     let ret = match opts.command {
-        BuildEbpf(opts) => build_ebpf::build(opts),
+        BuildEbpf(opts) => build_ebpf::build_ebpf(opts),
         Run(opts) => run::run(opts),
         Codegen => codegen::generate(),
     };
