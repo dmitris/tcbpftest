@@ -20,23 +20,33 @@ cargo install bpf-linker
 ```
 
 # Build and Run
+You can add the `--release` flag to perform a release build.
 ```
 git clone https://github.com/dmitris/tcbpftest
 cd tcbpftest
-```
+
 # build eBPF object file
-```
-cargo xtask build-ebpf
-```
+
+cargo xtask build-ebpf [--release]
+
 # build the user-space program
-```
-cargo build --release
+
+cargo build [--release]
 ```
 
-NB: for a debug build: `cargo xtask build-ebpf --debug && cargo build`.
+To run the program:
+```
+# debug build
+sudo ./target/debug/tcbpftest
 
-Load into the kernel and attach the eBPF object file to the `tc` hook,
-then run the user-space program reading data from the maps and printing to stdout:
+# release build
+sudo ./target/release/tcbpftest
+```
+
+You can also use `cargo xtask run [--release]` to build and run the program with one command.
+
+The `tcbpftest` executable loads into the kernel the eBPF object file and attaches it to the `tc` hook,
+then runs the user-space program reading data from the maps and printing to stdout:
 ```
 sudo target/release/tcbpftest
 
@@ -47,6 +57,8 @@ LOG: LEN 52, CTX_LEN 66, SRC_IP 140.82.113.26, DEST_IP 192.168.178.36, ETH_PROTO
 ```
 
 # Cross-compilation
+NB: the `llvm-sys` crate appears to be currently broken on Mac: [issue](https://gitlab.com/taricorp/llvm-sys.rs/-/issues/39).
+
 The example program can be cross-compiled on an Intel Mac for Linux:
 ```
 rustup target add x86_64-unknown-linux-musl
@@ -54,8 +66,8 @@ brew install FiloSottile/musl-cross/musl-cross
 brew install llvm
 # adjust the path for LLVM installation as needed - if installed with brew on Mac,
 # it is normally /usr/local/opt/llvm - see $(brew --prefix llvm).
-LLVM_SYS_140_PREFIX=/opt/local cargo install bpf-linker --no-default-features --features system-llvm --force
-cargo xtask build-ebpf
+$ LLVM_SYS_150_PREFIX=/opt/local cargo install bpf-linker --no-default-features --features system-llvm --force
+$ cargo xtask build-ebpf
 # '-C link-arg=-s' and '--release' flags are optional (to produce a smaller executable file)
 RUSTFLAGS="-Clinker=x86_64-linux-musl-ld -C link-arg=-s" cargo build --release --target=x86_64-unknown-linux-musl
 

@@ -1,16 +1,17 @@
 use aya::programs::{tc, SchedClassifier, TcAttachType};
 use aya::{include_bytes_aligned, maps::perf::AsyncPerfEventArray, util::online_cpus, Bpf};
 use bytes::BytesMut;
+use clap::Parser;
+use log::info;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode};
 use std::net::Ipv4Addr;
-use structopt::StructOpt;
 use tokio::{signal, task};
 
 use tcbpftest_common::PacketLog;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 struct Opt {
-    #[structopt(short, long, default_value = "eth0")]
+    #[clap(short, long, default_value = "eth0")]
     iface: String,
 }
 
@@ -46,7 +47,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let program: &mut SchedClassifier = bpf.program_mut("tcbpftest").unwrap().try_into()?;
     program.load()?;
     // program.attach(&opt.iface, TcAttachType::Egress)?;
-    program.attach(&opt.iface, TcAttachType::Ingress, 0)?;
+    program.attach(&opt.iface, TcAttachType::Ingress)?;
 
     let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut("EVENTS")?)?;
     for cpu_id in online_cpus()? {
@@ -84,6 +85,10 @@ async fn main() -> Result<(), anyhow::Error> {
             }
         });
     }
-    signal::ctrl_c().await.expect("failed to listen for event");
-    Ok::<_, anyhow::Error>(())
+
+    info!("Waiting for Ctrl-C...");
+    signal::ctrl_c().await?;
+    info!("Exiting...");
+
+    Ok(())
 }
