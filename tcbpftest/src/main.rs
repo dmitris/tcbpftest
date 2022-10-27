@@ -10,14 +10,14 @@ use tokio::{signal, task};
 use tcbpftest_common::PacketLog;
 
 #[derive(Debug, Parser)]
-struct Opt {
-    #[clap(short, long, default_value = "eth0")]
+struct Args {
+    #[arg(short, long, default_value = "eth0")]
     iface: String,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
-    let opt = Opt::from_args();
+    let args = Args::parse();
 
     TermLogger::init(
         LevelFilter::Debug,
@@ -43,11 +43,11 @@ async fn main() -> Result<(), anyhow::Error> {
     ))?;
     // error adding clsact to the interface if it is already added is harmless
     // the full cleanup can be done with 'sudo tc qdisc del dev eth0 clsact'.
-    let _ = tc::qdisc_add_clsact(&opt.iface);
+    let _ = tc::qdisc_add_clsact(&args.iface);
     let program: &mut SchedClassifier = bpf.program_mut("tcbpftest").unwrap().try_into()?;
     program.load()?;
-    // program.attach(&opt.iface, TcAttachType::Egress)?;
-    program.attach(&opt.iface, TcAttachType::Ingress)?;
+    // program.attach(&args.iface, TcAttachType::Egress)?;
+    program.attach(&args.iface, TcAttachType::Ingress)?;
 
     let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut("EVENTS")?)?;
     for cpu_id in online_cpus()? {
