@@ -5,7 +5,8 @@ edition = "2021"
 
 [dependencies]
 aya-bpf = { git = "http://github.com/aya-rs/aya", branch = "main" }
-memoffset = "0.6"
+aya-log-ebpf = { git = "https://github.com/aya-rs/aya-log", branch = "main" }
+memoffset = "0.6.1"
 tcbpftest-common = { path = "../tcbpftest-common" }
 
 [[bin]]

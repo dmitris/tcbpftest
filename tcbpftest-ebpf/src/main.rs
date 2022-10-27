@@ -9,6 +9,7 @@ use aya_bpf::{
 };
 use aya_bpf::bindings:: __sk_buff;
 use aya_bpf::helpers::bpf_skb_pull_data;
+use aya_log_ebpf::info;
 use core::mem;
 use memoffset::offset_of;
 
@@ -105,6 +106,7 @@ unsafe fn try_tcbpftest(ctx: TcContext) -> Result<i32, i64> {
     unsafe {
         EVENTS.output(&ctx, &log_entry, 0);
     }
+    info!(&ctx, "packet:");
     Ok(0)
 }
 
