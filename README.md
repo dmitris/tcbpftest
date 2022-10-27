@@ -20,27 +20,29 @@ cargo install bpf-linker
 ```
 
 # Build and Run
-You can add the `--release` flag to perform a release build.
+You can remove the `--release` flag to perform a debug build. In this case,
+it should also not be used in the next `cargo build` command (the two should
+be in sync).
 ```
 git clone https://github.com/dmitris/tcbpftest
 cd tcbpftest
 
 # build eBPF object file
 
-cargo xtask build-ebpf [--release]
+cargo xtask build-ebpf --release
 
 # build the user-space program
 
-cargo build [--release]
+cargo build --release
 ```
 
 To run the program:
 ```
-# debug build
-sudo ./target/debug/tcbpftest
-
 # release build
 sudo ./target/release/tcbpftest
+
+# debug build
+sudo ./target/debug/tcbpftest
 ```
 
 You can also use `cargo xtask run [--release]` to build and run the program with one command.
