@@ -59,8 +59,6 @@ LOG: LEN 52, CTX_LEN 66, SRC_IP 140.82.113.26, DEST_IP 192.168.178.36, ETH_PROTO
 ```
 
 # Cross-compilation
-NB: the `llvm-sys` crate appears to be currently broken on Mac: [issue](https://gitlab.com/taricorp/llvm-sys.rs/-/issues/39).
-
 The example program can be cross-compiled on an Intel Mac for Linux:
 ```
 rustup target add x86_64-unknown-linux-musl
@@ -68,9 +66,9 @@ brew install FiloSottile/musl-cross/musl-cross
 brew install llvm
 # adjust the path for LLVM installation as needed - if installed with brew on Mac,
 # it is normally /usr/local/opt/llvm - see $(brew --prefix llvm).
-$ LLVM_SYS_150_PREFIX=/opt/local cargo install bpf-linker --no-default-features --features system-llvm --force
-$ cargo xtask build-ebpf
-# '-C link-arg=-s' and '--release' flags are optional (to produce a smaller executable file)
+$ LLVM_SYS_150_PREFIX=/opt/local cargo install bpf-linker --no-default-features --features system-llvm
+$ cargo xtask build-ebpf --release
+# '-C link-arg=-s' flag is optional (to produce a smaller executable file)
 RUSTFLAGS="-Clinker=x86_64-linux-musl-ld -C link-arg=-s" cargo build --release --target=x86_64-unknown-linux-musl
 
 ```
