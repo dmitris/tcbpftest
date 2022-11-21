@@ -36,6 +36,13 @@ cargo xtask build-ebpf --release
 cargo build --release
 ```
 
+If you want to build a static binary with musl, install the musl target and pass the `--target` parameter to `cargo build`:
+```
+rustup target add x86_64-unknown-linux-musl
+cargo xtask build-ebpf --release
+cargo build --release --release --target=x86_64-unknown-linux-musl
+```
+
 To run the program:
 ```
 # release build
