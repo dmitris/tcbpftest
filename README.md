@@ -40,7 +40,7 @@ If you want to build a static binary with musl, install the musl target and pass
 ```
 rustup target add x86_64-unknown-linux-musl
 cargo xtask build-ebpf --release
-cargo build --release --release --target=x86_64-unknown-linux-musl
+cargo build --release --target=x86_64-unknown-linux-musl
 ```
 
 To run the program:
