@@ -1,6 +1,7 @@
 #![no_std]
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct PacketLog {
     pub len: u32,         // packet length
     pub ctx_len: u32,     // skb length

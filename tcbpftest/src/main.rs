@@ -1,5 +1,10 @@
-use aya::programs::{tc, SchedClassifier, TcAttachType};
-use aya::{include_bytes_aligned, maps::perf::AsyncPerfEventArray, util::online_cpus, Bpf};
+use aya::{
+    include_bytes_aligned,
+    maps::perf::AsyncPerfEventArray,
+    programs::{tc, SchedClassifier, TcAttachType},
+    util::online_cpus,
+    Bpf,
+};
 use bytes::BytesMut;
 use clap::Parser;
 use log::info;
@@ -50,12 +55,15 @@ async fn main() -> Result<(), anyhow::Error> {
     program.attach(&args.iface, TcAttachType::Ingress)?;
 
     let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut("EVENTS")?)?;
-    for cpu_id in online_cpus()? {
+
+    let cpus = online_cpus()?;
+    let num_cpus = cpus.len();
+    for cpu_id in cpus {
         let mut buf = perf_array.open(cpu_id, None)?;
 
         task::spawn(async move {
-            let mut buffers = (0..10)
-                .map(|_| BytesMut::with_capacity(1024))
+            let mut buffers = (0..num_cpus)
+                .map(|_| BytesMut::with_capacity(std::mem::size_of::<PacketLog>()))
                 .collect::<Vec<_>>();
 
             loop {

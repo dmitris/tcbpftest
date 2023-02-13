@@ -52,7 +52,7 @@ sudo ./target/release/tcbpftest
 sudo ./target/debug/tcbpftest
 ```
 
-You can also use `cargo xtask run [--release]` to build and run the program with one command.
+You can also use `RUST_LOG=info cargo xtask run [--release]` to build and run the program with one command.
 
 The `tcbpftest` executable loads into the kernel the eBPF object file and attaches it to the `tc` hook,
 then runs the user-space program reading data from the maps and printing to stdout:
