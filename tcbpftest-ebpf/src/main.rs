@@ -1,6 +1,8 @@
 #![no_std]
 #![no_main]
 
+use core::mem;
+
 use aya_bpf::{
     bindings::TC_ACT_PIPE,
     macros::{classifier, map},
@@ -45,41 +47,43 @@ unsafe fn try_tcbpftest(ctx: TcContext) -> Result<i32, i64> {
         EtherType::Ipv4 => {}
         _ => return Ok(TC_ACT_PIPE),
     }
-
-    let ipv4hdr: Ipv4Hdr = ctx.load(EthHdr::LEN).map_err(|_| -1)?;
-
-    let saddr = u32::from_be(ipv4hdr.src_addr);
-    let daddr = u32::from_be(ipv4hdr.dst_addr);
+    let ipv4hdr: *const Ipv4Hdr = unsafe { ptr_at(&ctx, EthHdr::LEN) }.map_err(|_| -1)?;
+    let saddr = u32::from_be(unsafe { *ipv4hdr }.src_addr);
+    let daddr = u32::from_be(unsafe { *ipv4hdr }.dst_addr);
 
     let mut udp_len_val: u16 = 0;
     let sport: u16;
     let dport: u16;
-    match ipv4hdr.proto {
+    match unsafe { *ipv4hdr }.proto {
         IpProto::Tcp => {
-            let tcphdr: TcpHdr = ctx.load(EthHdr::LEN + Ipv4Hdr::LEN).map_err(|_| -1)?;
+            let tcphdr: *const TcpHdr =
+                unsafe { ptr_at(&ctx, EthHdr::LEN + Ipv4Hdr::LEN) }.map_err(|_| -1)?;
+            // let tcphdr: TcpHdr = ctx.load(EthHdr::LEN + Ipv4Hdr::LEN).map_err(|_| -1)?;
 
             // pass unless the SYN flag is set and ACK - not set
-            if tcphdr.syn() == 0 || tcphdr.ack() != 0 {
+            if unsafe { *tcphdr }.syn() == 0 || unsafe { *tcphdr }.ack() != 0 {
                 return Ok(TC_ACT_PIPE);
             }
-            sport = u16::from_be(tcphdr.source);
-            dport = u16::from_be(tcphdr.dest);
+            sport = u16::from_be(unsafe { *tcphdr }.source);
+            dport = u16::from_be(unsafe { *tcphdr }.dest);
         }
         IpProto::Udp => {
-            let udphdr: UdpHdr = ctx.load(EthHdr::LEN + Ipv4Hdr::LEN).map_err(|_| -1)?;
-            sport = u16::from_be(udphdr.source);
-            dport = u16::from_be(udphdr.dest);
-            udp_len_val = udphdr.len;
+            let udphdr: *const UdpHdr =
+                unsafe { ptr_at(&ctx, EthHdr::LEN + Ipv4Hdr::LEN) }.map_err(|_| -1)?;
+            // let udphdr: UdpHdr = ctx.load(EthHdr::LEN + Ipv4Hdr::LEN).map_err(|_| -1)?;
+            sport = u16::from_be(unsafe { *udphdr }.source);
+            dport = u16::from_be(unsafe { *udphdr }.dest);
+            udp_len_val = unsafe { *udphdr }.len;
         }
         _ => return Ok(TC_ACT_PIPE),
     };
     let log_entry = PacketLog {
-        len: u16::from_be(ipv4hdr.tot_len) as u32,
+        len: u16::from_be(unsafe { *ipv4hdr }.tot_len) as u32,
         ctx_len: ctx.len(),
         src_addr: saddr,
         dest_addr: daddr,
         eth_proto: u16::from_be(ethhdr.ether_type as u16) as u32,
-        ip_proto: u16::from_be(ipv4hdr.proto as u16) as u32,
+        ip_proto: unsafe { *ipv4hdr }.proto as u32,
         sport: sport as u32,
         dport: dport as u32,
         udp_len: u16::from_be(udp_len_val) as u32,
@@ -89,6 +93,19 @@ unsafe fn try_tcbpftest(ctx: TcContext) -> Result<i32, i64> {
         EVENTS.output(&ctx, &log_entry, 0);
     }
     Ok(TC_ACT_PIPE)
+}
+
+#[inline(always)]
+unsafe fn ptr_at<T>(ctx: &TcContext, offset: usize) -> Result<*const T, ()> {
+    let start = ctx.data();
+    let end = ctx.data_end();
+    let len = mem::size_of::<T>();
+
+    if start + offset + len > end {
+        return Err(());
+    }
+
+    Ok((start + offset) as *const T)
 }
 
 // TODO: add en example with using the bpf_skb_pull_data helper and then ptr_at
@@ -109,6 +126,7 @@ unsafe fn try_tcbpftest(ctx: TcContext) -> Result<i32, i64> {
 // get the ethernet header proto field as well as the IP protocol one
 // let eth_proto = u16::from_be(ctx.load(offset_of!(ethhdr, h_proto))?);
 // let eth_proto2 = u32::from_be((*skb).protocol);
+// let ipv4hdr: Ipv4Hdr = ctx.load(EthHdr::LEN).map_err(|_| -1)?;
 // let ip_proto = ctx.load::<u8>(ETH_HDR_LEN + offset_of!(iphdr, protocol))?;
 // let saddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, saddr))?);
 // let daddr = u32::from_be(ctx.load(ETH_HDR_LEN + offset_of!(iphdr, daddr))?);
@@ -149,18 +167,4 @@ unsafe fn try_tcbpftest(ctx: TcContext) -> Result<i32, i64> {
 //     };
 // }
 // let rem_port = u16::from_be(rem_port_val);
-// let loc_port = u16::from_be(loc_port_val);
-
-// #[inline(always)]
-// unsafe fn ptr_at<T>(ctx: &TcContext, offset: usize) -> Result<*const T, ()> {
-//     let raw_skb = ctx.as_ptr() as *const __sk_buff;
-//     let start = (*raw_skb).data as usize;
-//     let end = (*raw_skb).data_end as usize;
-//     let len = mem::size_of::<T>();
-
-//     if start + offset + len > end {
-//         return Err(());
-//     }
-
-//     Ok((start + offset) as *const T)
-// }
+// let loc_port = u16::from_be(loc_port_val);}
