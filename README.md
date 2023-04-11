@@ -66,7 +66,7 @@ LOG: LEN 52, CTX_LEN 66, SRC_IP 140.82.113.26, DEST_IP 192.168.178.36, ETH_PROTO
 ```
 
 # Cross-compilation
-The example program can be cross-compiled on an Intel Mac for Linux:
+The example program can be cross-compiled on a Mac for Linux:
 ```
 rustup target add x86_64-unknown-linux-musl
 brew install FiloSottile/musl-cross/musl-cross
