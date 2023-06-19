@@ -73,7 +73,7 @@ brew install FiloSottile/musl-cross/musl-cross
 brew install llvm
 # adjust the path for LLVM installation as needed - if installed with brew on Mac,
 # see `brew --prefix llvm`.
-$ LLVM_SYS_160_PREFIX=$(brew --prefix llvm) cargo install bpf-linker --no-default-features --features system-llvm
+$ LLVM_SYS_160_PREFIX=$(brew --prefix llvm) cargo install bpf-linker --features system-llvm
 $ cargo xtask build-ebpf --release
 # '-C link-arg=-s' flag is optional (to produce a smaller executable file)
 RUSTFLAGS="-Clinker=x86_64-linux-musl-ld -C link-arg=-s" cargo build --release --target=x86_64-unknown-linux-musl
