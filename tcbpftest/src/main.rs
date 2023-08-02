@@ -49,12 +49,24 @@ async fn main() -> Result<(), anyhow::Error> {
     // error adding clsact to the interface if it is already added is harmless
     // the full cleanup can be done with 'sudo tc qdisc del dev eth0 clsact'.
     let _ = tc::qdisc_add_clsact(&args.iface);
-    let program: &mut SchedClassifier = bpf.program_mut("tcbpftest").unwrap().try_into()?;
+    // this is just for information and debugging - show the found programs.
+    for (name, program) in bpf.programs() {
+        println!(
+            "[INFO] found program `{}` of type `{:?}`",
+            name,
+            program.prog_type()
+        );
+    }
+    let p = match bpf.program_mut("classifier") {
+        Some(v) => v,
+        None => panic!("bpf.program_mut('classifier') returned 'None'")
+    };
+    let program: &mut SchedClassifier = p.try_into()?;
     program.load()?;
     // program.attach(&args.iface, TcAttachType::Egress)?;
     program.attach(&args.iface, TcAttachType::Ingress)?;
 
-    let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut("EVENTS")?)?;
+    let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut("EVENTS").unwrap())?;
 
     let cpus = online_cpus()?;
     let num_cpus = cpus.len();
