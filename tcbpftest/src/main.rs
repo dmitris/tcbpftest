@@ -57,7 +57,7 @@ async fn main() -> Result<(), anyhow::Error> {
             program.prog_type()
         );
     }
-    let program: &mut SchedClassifier = bpf.program_mut("classifier").unwrap().try_into()?;
+    let program: &mut SchedClassifier = bpf.program_mut("foobartest").unwrap().try_into()?;
     program.load()?;
     // program.attach(&args.iface, TcAttachType::Egress)?;
     program.attach(&args.iface, TcAttachType::Ingress)?;
