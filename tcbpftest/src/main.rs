@@ -5,9 +5,10 @@ use aya::{
     util::online_cpus,
     Bpf,
 };
+use aya_log::BpfLogger;
 use bytes::BytesMut;
 use clap::Parser;
-use log::info;
+use log::{info, warn};
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode};
 use std::net::Ipv4Addr;
 use tokio::{signal, task};
@@ -46,10 +47,14 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut bpf = Bpf::load(include_bytes_aligned!(
         "../../target/bpfel-unknown-none/release/tcbpftest"
     ))?;
+    if let Err(e) = BpfLogger::init(&mut bpf) {
+        // This can happen if you remove all log statements from your eBPF program.
+        warn!("failed to initialize eBPF logger: {}", e);
+    }
     // error adding clsact to the interface if it is already added is harmless
     // the full cleanup can be done with 'sudo tc qdisc del dev eth0 clsact'.
     let _ = tc::qdisc_add_clsact(&args.iface);
-    // this is just for information and debugging - show the found programs.
+    // this is just for information and debugging - show all the found programs.
     for (name, program) in bpf.programs() {
         println!(
             "[INFO] found program `{}` of type `{:?}`",
@@ -57,12 +62,11 @@ async fn main() -> Result<(), anyhow::Error> {
             program.prog_type()
         );
     }
-    let program: &mut SchedClassifier = bpf.program_mut("classifier").unwrap().try_into()?;
+    let program: &mut SchedClassifier = bpf.program_mut("tcbpftest").unwrap().try_into()?;
     program.load()?;
-    // program.attach(&args.iface, TcAttachType::Egress)?;
     program.attach(&args.iface, TcAttachType::Ingress)?;
 
-    let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut("EVENTS").unwrap())?;
+    let mut perf_array = AsyncPerfEventArray::try_from(bpf.take_map("EVENTS").unwrap())?;
 
     let cpus = online_cpus()?;
     let num_cpus = cpus.len();
