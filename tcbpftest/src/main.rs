@@ -57,11 +57,7 @@ async fn main() -> Result<(), anyhow::Error> {
             program.prog_type()
         );
     }
-    let p = match bpf.program_mut("classifier") {
-        Some(v) => v,
-        None => panic!("bpf.program_mut('classifier') returned 'None'")
-    };
-    let program: &mut SchedClassifier = p.try_into()?;
+    let program: &mut SchedClassifier = bpf.program_mut("classifier").unwrap().try_into()?;
     program.load()?;
     // program.attach(&args.iface, TcAttachType::Egress)?;
     program.attach(&args.iface, TcAttachType::Ingress)?;
