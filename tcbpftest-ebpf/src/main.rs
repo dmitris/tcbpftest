@@ -26,14 +26,14 @@ use tcbpftest_common::PacketLog;
 #[allow(dead_code)]
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
-    unreachable!()
+    unsafe { core::hint::unreachable_unchecked() }
 }
 
-#[map(name = "EVENTS")]
+#[map]
 static mut EVENTS: PerfEventArray<PacketLog> =
     PerfEventArray::<PacketLog>::with_max_entries(1024, 0);
 
-#[classifier(name = "tcbpftest")]
+#[classifier]
 pub fn tcbpftest(ctx: TcContext) -> i32 {
     match unsafe { try_tcbpftest(ctx) } {
         Ok(ret) => ret,
