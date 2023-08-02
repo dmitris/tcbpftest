@@ -34,7 +34,7 @@ static mut EVENTS: PerfEventArray<PacketLog> =
     PerfEventArray::<PacketLog>::with_max_entries(1024, 0);
 
 #[classifier]
-pub fn foobartest(ctx: TcContext) -> i32 {
+pub fn tcbpftest(ctx: TcContext) -> i32 {
     match unsafe { try_tcbpftest(ctx) } {
         Ok(ret) => ret,
         Err(_) => 123,
