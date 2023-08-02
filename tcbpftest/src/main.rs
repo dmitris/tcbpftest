@@ -58,7 +58,7 @@ async fn main() -> Result<(), anyhow::Error> {
         );
     }
     let program: &mut SchedClassifier = bpf.program_mut("foobartest").unwrap().try_into()?;
-    // program.attach(&args.iface, TcAttachType::Egress)?;
+    program.load()?;
     program.attach(&args.iface, TcAttachType::Ingress)?;
 
     let mut perf_array = AsyncPerfEventArray::try_from(bpf.map_mut("EVENTS").unwrap())?;
