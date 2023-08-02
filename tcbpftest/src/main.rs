@@ -5,6 +5,7 @@ use aya::{
     util::online_cpus,
     Bpf,
 };
+use aya_log::BpfLogger;
 use bytes::BytesMut;
 use clap::Parser;
 use log::info;
